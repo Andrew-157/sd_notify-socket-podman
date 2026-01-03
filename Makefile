@@ -5,4 +5,4 @@ client.out: unix_socket_client.c
 	gcc -Wall -o client.out unix_socket_client.c
 
 clean:
-	rm -vf *.out
+	rm -vf *.out unix_socket
