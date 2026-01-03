@@ -1,0 +1,9 @@
+[Unit]
+Description=Watchdog Service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/opt/watchdog
+WatchdogSec=10
+StartLimitBurst=0
