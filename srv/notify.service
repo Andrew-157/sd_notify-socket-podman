@@ -1,0 +1,9 @@
+[Unit]
+Description=Service with type notify
+
+[Service]
+Restart=always
+TimeoutStartSec=10
+Type=notify
+NotifyAccess=main
+ExecStart=/opt/notify
