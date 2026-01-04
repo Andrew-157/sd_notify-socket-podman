@@ -1,0 +1,10 @@
+[Unit]
+Description=Watchdog Service that is going to fail
+
+[Service]
+Type=simple
+Restart=always
+Environment=FAIL_WATCHDOG=1
+ExecStart=/opt/watchdog
+WatchdogSec=10
+StartLimitBurst=0
