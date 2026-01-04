@@ -1,3 +1,4 @@
+// You can also see exemplary unix socket server implementation in man bind
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
