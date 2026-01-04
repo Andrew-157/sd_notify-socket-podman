@@ -1,5 +1,6 @@
 /*
- * Exemplary script to be used in systemd service with Type=simple, and WatchdogSec= set, e.g. script should send READY=1 with sd_notify
+ *
+ * Exemplary script to be used in systemd service with Type=simple, and WatchdogSec= set, e.g. script should send WATCHDOG=1 with sd_notify
  *
  * */
 #include <signal.h>
