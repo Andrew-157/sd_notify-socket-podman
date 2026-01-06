@@ -7,7 +7,7 @@
 #include <sys/un.h>
 
 #define BACKLOG 5
-#define SOCKET_PATH "/etc/custom_sd_notify_socket"
+#define SOCKET_PATH "/etc/custom_sd_notify_socket"  // this file should be removed before call to bind and on program exit
 
 int main() {
 	int sockfd;
@@ -30,13 +30,14 @@ int main() {
 		exit(1);
 	}
 
-	if ((numbytes = recvfrom(sockfd, message, sizeof(message), 0, NULL, NULL)) == -1) {
-		perror("server: recvfrom");
-		exit(1);
+	while (1) {
+		if ((numbytes = recvfrom(sockfd, message, sizeof(message), 0, NULL, NULL)) == -1) {
+			perror("server: recvfrom");
+			exit(1);
+		}
+		message[numbytes] = '\0';
+		printf("Received message from client: %s\n", message);
 	}
-
-	message[numbytes] = '\0';
-	printf("Received message from client: %s\n", message);
 
 	close(sockfd);
 }
