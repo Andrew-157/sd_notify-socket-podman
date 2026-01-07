@@ -1,0 +1,5 @@
+[Unit]
+Description=Socket activated by sd_notify
+
+[Socket]
+ListenDatagram=/run/custom_sd_notify_socket
