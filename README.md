@@ -159,7 +159,7 @@ $ root (scripts) > NOTIFY_SOCKET=/etc/custom_sd_notify_socket ./raw_sd_notify
 
 ## Custom `NOTIFY_SOCKET` with podman
 
-Finally, what will happen if I use custom `NOTIFY_SOCKET` from [Custom `NOTIFY_SOCKET` section](#custom-notify-socket)?
+Finally, what will happen if I use custom `NOTIFY_SOCKET` from [Custom NOTIFY_SOCKET section](./#custom-notify-socket)?
 
 One terminal - socket side:
 
