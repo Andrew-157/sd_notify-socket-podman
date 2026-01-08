@@ -1,6 +1,10 @@
 # sd_notify and podman
 * [Motivation](#motivation)
 * [How to use systemd-devel](#how-to-use-systemd-devel)
+* [sd_notify WATCHDOG=1](#sd_notify-watchdog=1)
+* [sd_notify READY=1](#sd_notify-ready=1)
+* [Custom NOTIFY_SOCKET](#custom-notify_socket)
+* [Custom NOTIFY_SOCKET with podman](#custom-notify_socket-with-podman)
 
 ## Motivation
 
