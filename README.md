@@ -1,5 +1,6 @@
 # sd_notify and podman
 * [Motivation](#motivation)
+* [How to use systemd-devel](#how-to-use-systemd-devel)
 
 ## Motivation
 
@@ -26,7 +27,7 @@ TimeoutStartSec=900
 WantedBy=multi-user.target default.target
 ```
 
-You put the contents above into `/etc/containers/systemd`, run `systemctl daemon-reload` and podman will generate a systemd unit that looks something like that:
+You put the contents above into `/etc/containers/systemd/test.container`, run `systemctl daemon-reload` and podman will generate a systemd unit that looks something like that:
 
 ```ini
 # /run/systemd/generator/test.service                                                                                                                          
@@ -90,4 +91,90 @@ WantedBy=multi-user.target default.target
 If you start the service `test.service`, the container `systemd-test` will be started. If you stop `systemd-test`, the above service will restart the container(actually, it will completely recreate the container, but that's not the point). How it is done? How does `test.service` know that `test-systemd` went down. This is done with the service's Type "notify" and with podman run's option "--sdnotify=conmon".
 
 I was interested how that worked, so I created that repo. This is not really a project, this is more of a research for me.
+
+## How to use systemd-devel
+
+To use `systemd-devel` library, first install it:
+
+```bash
+dnf install systemd-devel
+```
+
+Include it in your code:
+
+```c
+#include <systemd/sd-daemon.h>
+
+int main() {
+    sd_notify(0, "READY=1");
+}
+```
+
+When compiling the above program, link systemd library:
+
+```bash
+gcc -Wall watchdog_script.c -lsystemd
+```
+
+## sd_notify WATCHDOG=1
+
+In this repo see script `watchdog_script.c`. This script can be used with systemd service that uses `WatchdogSec=` option. Exemplary services in this repo are `watchdog.service` and `watchdog-fail.service`.
+
+## sd_notify READY=1
+
+In this repo see script `notify_script.c`. This script can be used with systemd service of type "notify". Exemplary service in this repo is `notify.service`.
+
+## Custom NOTIFY_SOCKET
+
+`NOTIFY_SOCKET` is an environment variable which systemd passes to services which will be using `sd_notify` function. In this repo you can find custom implementation of the socket that could be passed in `NOTIFY_SOCKET` environment variable. The implementation is in `notify_socket.c`. systemd man pages provide exemplary implementation of `sd_notify` function in C and Python, I have those implementations in this repo in files `raw_sd_notify.c` and `raw_sd_notify.py`. You can use those implementations with custom `NOTIFY_SOCKET` like that:
+
+One terminal - socket side:
+
+```
+bash
+$ root (scripts) > gcc -Wall -o notify_socket notify_socket.c 
+$ root (scripts) > ./notify_socket 
+File /etc/custom_sd_notify_socket doesn't exist - nothing to do
+Received message from client: READY=1
+Received message from client: RELOADING=1
+MONOTONIC_USEC=2142239351
+Received message from client: READY=1
+Received message from client: STOPPING=1
+^CCaught signal 2
+File /etc/custom_sd_notify_socket exists - removing
+$ root (scripts) > 
+```
+
+Another terminal - `sd_notify` side (notice that it doesn't require systemd library for compilation):
+
+```bash
+$ root (scripts) > gcc -Wall -o raw_sd_notify raw_sd_notify.c 
+$ root (scripts) > NOTIFY_SOCKET=/etc/custom_sd_notify_socket ./raw_sd_notify 
+^C$ root (scripts) > 
+```
+
+## Custom `NOTIFY_SOCKET` with podman
+
+Finally, what will happen if I use custom `NOTIFY_SOCKET` from [Custom `NOTIFY_SOCKET` section](#custom-notify-socket)?
+
+One terminal - socket side:
+
+```bash
+$ root (scripts) > ./notify_socket 
+File /etc/custom_sd_notify_socket doesn't exist - nothing to do
+Received message from client: MAINPID=1913
+READY=1
+^CCaught signal 2
+File /etc/custom_sd_notify_socket exists - removing
+```
+
+Another terminal - podman side:
+
+```bash
+$ root (scripts) > NOTIFY_SOCKET=/etc/custom_sd_notify_socket /usr/bin/podman run --name custom --replace --rm --sdnotify=conmon -d registry.access.redhat.com/ubi9:latest sleep inf
+a08eb5a176a7a28f13f50468107db66e3682e42f2d1d5752fc40230f4c00adea
+$ root (scripts) > podman stop custom
+WARN[0010] StopSignal SIGTERM failed to stop container custom in 10 seconds, resorting to SIGKILL 
+custom
+```
 
